@@ -7,6 +7,8 @@ import (
 	"github.com/bruli/go-core/event"
 )
 
+//go:generate go tool moq -out command_handler_mock.go . CommandHandler
+
 type InvalidCommandError struct {
 	expected string
 	had      string
