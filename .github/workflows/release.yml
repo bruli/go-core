@@ -1,18 +1,67 @@
-name: Release
+name: Check and release
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
   issues: write
   pull-requests: write
+  packages: write
+
+env:
+  DEPLOYMENT_FILE: manifests/deployment.yaml
 
 jobs:
+  lint:
+      runs-on: ubuntu-latest
+
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v5
+
+          - name: Setup Go and Task
+            uses: ./.github/actions/setup-go-task
+
+          - name: Lint
+            run: task lint
+  security:
+      runs-on: ubuntu-latest
+
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v5
+
+          - name: Setup Go and Task
+            uses: ./.github/actions/setup-go-task
+
+          - name: Security
+            run: task security
+  test:
+      runs-on: ubuntu-latest
+
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v5
+
+          - name: Setup Go and Task
+            uses: ./.github/actions/setup-go-task
+
+          - name: Tests
+            run: task test
   release:
+    needs:
+        - lint
+        - security
+        - test
     runs-on: ubuntu-latest
+
+    outputs:
+      released: ${{ steps.semantic.outputs.new_release_published }}
+      version: ${{ steps.semantic.outputs.new_release_version }}
 
     steps:
       - uses: actions/checkout@v5
@@ -21,9 +70,10 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: "24"
+          node-version: 24
 
-      - name: Release
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
