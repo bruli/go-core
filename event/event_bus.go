@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 )
 
 type UnknownEventToDispatchError struct {
@@ -29,16 +30,29 @@ func (e Bus) Subscribe(eventName string, listeners ...Listener) {
 }
 
 func (e Bus) Dispatch(ctx context.Context, ev Event) error {
-	errs := make([]error, 0)
 	list, ok := e[ev.EventName()]
 	if !ok {
 		return UnknownEventToDispatchError{event: ev.EventName()}
 	}
+
+	var (
+		wg   sync.WaitGroup
+		mu   sync.Mutex
+		errs = make([]error, 0, len(list))
+	)
 	for _, l := range list {
-		if err := l.Listen(ctx, ev); err != nil {
-			errs = append(errs, err)
-		}
+		wg.Add(1)
+		go func(l Listener) {
+			defer wg.Done()
+			if err := l.Listen(ctx, ev); err != nil {
+				mu.Lock()
+				errs = append(errs, err)
+				mu.Unlock()
+			}
+		}(l)
 	}
+	wg.Wait()
+
 	err := errors.Join(errs...)
 	if err != nil {
 		return NewDispatchError(err.Error(), ev.EventName())
