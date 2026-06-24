@@ -8,7 +8,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func NewCommandHandlerEventListenerMiddleware(list event.Listener, tracer trace.Tracer) CommandHandlerMiddleware {
+func NewCommandHandlerEventBusMiddleware(eb *event.Bus, tracer trace.Tracer) CommandHandlerMiddleware {
 	return func(h CommandHandler) CommandHandler {
 		return CommandHandlerFunc(func(ctx context.Context, c Command) ([]event.Event, error) {
 			ctx, span := tracer.Start(ctx, "CommandHandlerEventListenerMiddleware")
@@ -20,7 +20,7 @@ func NewCommandHandlerEventListenerMiddleware(list event.Listener, tracer trace.
 				return nil, err
 			}
 			for _, ev := range events {
-				if err := list.Listen(ctx, ev); err != nil {
+				if err := eb.Dispatch(ctx, ev); err != nil {
 					span.RecordError(err)
 					span.SetStatus(codes.Error, err.Error())
 					return nil, err
