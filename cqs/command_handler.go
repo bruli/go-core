@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bruli/go-core/event"
+	"github.com/bruli-lab/go-core/event"
 )
 
 //go:generate go tool moq -out command_handler_mock.go . CommandHandler

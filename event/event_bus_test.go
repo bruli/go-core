@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bruli/go-core/event"
+	"github.com/bruli-lab/go-core/event"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )

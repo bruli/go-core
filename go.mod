@@ -1,4 +1,4 @@
-module github.com/bruli/go-core
+module github.com/bruli-lab/go-core
 
 go 1.26.4
 

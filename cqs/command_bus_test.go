@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/bruli/go-core/cqs"
-	"github.com/bruli/go-core/event"
+	"github.com/bruli-lab/go-core/cqs"
+	"github.com/bruli-lab/go-core/event"
 	"github.com/stretchr/testify/require"
 )
 
