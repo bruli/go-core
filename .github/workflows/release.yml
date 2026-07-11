@@ -12,9 +12,6 @@ permissions:
   pull-requests: write
   packages: write
 
-env:
-  DEPLOYMENT_FILE: manifests/deployment.yaml
-
 jobs:
   lint:
       runs-on: ubuntu-latest
